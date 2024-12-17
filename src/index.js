@@ -1,5 +1,11 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, IntentsBitField } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  IntentsBitField,
+  EmbedBuilder,
+  Embed,
+} = require("discord.js");
 
 /*
 Client: Kết nối bot của bạn với Discord API.
@@ -41,29 +47,84 @@ client.on("ready", (c) => {
   console.log(`✅ ${c.user.tag} is online.`);
 });
 
-client.on('interactionCreate', (interaction) => {
-
+client.on("interactionCreate", (interaction) => {
   if (!interaction.isChatInputCommand()) {
     return;
   }
 
-  if (interaction.commandName === 'hey') {
-    interaction.reply('hey!')
-  } 
+  if (interaction.commandName === "add") {
+    const num1 = interaction.options.get("first-number")?.value;
+    const num2 = interaction.options.get("second-number")?.value;
 
-  if (interaction.commandName === 'ping') {
-    interaction.reply('pong!')
-  } 
-})
+    interaction.reply(`The sum is ${num1 + num2}`);
+  }
 
-// client.on("messageCreate", (message) => {
-//   if (message.author.bot) {
-//     return;
-//   }
+  // ======================== EMBED LINK ==========================================
+  if (interaction.commandName === "embed") {
+    const embed = new EmbedBuilder()
+      .setTitle("Embed title")
+      .setDescription("This is an embed description")
+      .setColor("Random")
+      .addFields(
+        { name: "Regular field title", value: "Some value here" },
+        { name: "\u200B", value: "\u200B" },
+        { name: "Inline field title", value: "Some value here", inline: true },
+        { name: "Inline field title", value: "Some value here", inline: true }
+      )
+      .addFields({
+        name: "Inline field title",
+        value: "Some value here",
+        inline: true,
+      })
+      .setTimestamp()
+      .setFooter({ text: "This is an embed footer" });
 
-//   if (message.content === "hello") { 
-//     message.reply("hello!");
-//   }
-// });
+    interaction.reply({ embeds: [embed] });
+  }
+  //=====================================================================================
+
+  if (interaction.commandName === "hey") {
+    interaction.reply("hey!");
+  }
+
+  if (interaction.commandName === "ping") {
+    interaction.reply("pong!");
+  }
+});
+
+client.on("messageCreate", (message) => {
+  if (message.content === "embed") {
+    const embed = new EmbedBuilder()
+      .setColor("Random")
+      .setTitle("Embed title")
+      .setDescription("This is an embed description")
+      .addFields(
+        {
+          name: "Field title,",
+          value: "Some random value",
+          inline: true,
+        },
+        {
+          name: "2nd Field title,",
+          value: "Some random value",
+          inline: true,
+        }
+      )
+      .setTimestamp()
+      .setFooter({ text: "This is an embed footer" });
+    message.channel.send({ embeds: [embed] });
+  }
+});
+
+//==============================================================================================================
+client.on("messageCreate", (message) => {
+  if (message.author.bot) {
+    return;
+  }
+
+  if (message.content === "hello") {
+    message.reply("hello!");
+  }
+});
 
 client.login(process.env.TOKEN);
