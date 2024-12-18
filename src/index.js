@@ -5,6 +5,7 @@ const {
   IntentsBitField,
   EmbedBuilder,
   Embed,
+  ActivityType,
 } = require("discord.js");
 
 /*
@@ -32,7 +33,18 @@ GatewayIntentBits.MessageContent: Cho phép bot đọc nội dung tin nhắn (y�
 IntentsBitField là một công cụ khác để quản lý và kiểm tra các intent.
 Nó cung cấp các phương thức để tạo hoặc kiểm tra các intent phức tạp. 
 
+
+
+setActivity:
+Chỉ dùng để thiết lập hoạt động (Activity) của bot, như "Playing", "Listening", "Watching", hoặc "Streaming".
+Không thay đổi trạng thái (online, idle, dnd, invisible).
+
+setPresence:
+Toàn diện hơn, vì nó cho phép thay đổi cả hoạt động và trạng thái của bot cùng lúc.
+
 */
+
+//==========================================================================================
 
 const client = new Client({
   intents: [
@@ -43,8 +55,45 @@ const client = new Client({
   ],
 });
 
+let activities = [
+  {
+    name: "Live Coding",
+    type: ActivityType.Streaming,
+    url: "https://www.youtube.com/watch?v=uC8sc0cQa9M",
+  },
+  {
+    name: "Spotify",
+    type: ActivityType.Listening,
+  },
+  {
+    name: "YouTube Videos",
+    type: ActivityType.Watching,
+  },
+  {
+    name: "Coding with Discord.js",
+    type: ActivityType.Playing,
+  },
+];
+
 client.on("ready", (c) => {
   console.log(`✅ ${c.user.tag} is online.`);
+
+  // const tenMinutes = 1 * 60 * 1000; // 10 phút = 10 * 60 * 1000 miligiây
+
+  // setInterval(() => {
+  //   let random = Math.floor(Math.random() * activities.length);
+
+  //   client.user.setPresence({
+  //     activities: [activities[random]],     // Thiết lập hoạt động
+  //     status: "dnd",                        // Các giá trị: "online", "idle", "dnd", "invisible"
+  //   });
+  // }, 15000);
+
+
+  client.user.setPresence({
+    activities: [activities[1]], // Hoạt động ban đầu
+    status: "idle", // Trạng thái mặc định
+  });
 });
 
 client.on("interactionCreate", (interaction) => {
@@ -113,6 +162,39 @@ client.on("messageCreate", (message) => {
       .setTimestamp()
       .setFooter({ text: "This is an embed footer" });
     message.channel.send({ embeds: [embed] });
+  }
+});
+
+//=================================================================================
+
+client.on("interactionCreate", async (interaction) => {
+  try {
+    if (!interaction.isButton()) return;
+
+    await interaction.deferReply({ ephemeral: true });
+
+    const role = interaction.guild.roles.cache.get(interaction.customId);
+
+    if (!role) {
+      interaction.editReply({
+        content: "I couldn't find a role",
+      });
+
+      return;
+    }
+
+    const hasRole = interaction.member.roles.cache.has(role.id);
+
+    if (hasRole) {
+      await interaction.member.roles.remove(role);
+      await interaction.editReply(`The role ${role} has been removed`);
+      return;
+    }
+
+    await interaction.member.roles.add(role);
+    await interaction.editReply(`The role ${role} has been added`);
+  } catch (error) {
+    console.log(error);
   }
 });
 
