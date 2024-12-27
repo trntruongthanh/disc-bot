@@ -23,10 +23,6 @@ const commands = [
     description: "Replies with hey!",
   },
   {
-    name: "ping",
-    description: "pong!",
-  },
-  {
     name: "add",
     description: "Adds two numbers",
     options: [

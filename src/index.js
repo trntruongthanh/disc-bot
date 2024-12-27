@@ -8,6 +8,8 @@ const {
   ActivityType,
 } = require("discord.js");
 
+const eventHandler = require("./handlers/eventHandler");
+
 /*
 Client: Kết nối bot của bạn với Discord API.
 GatewayIntentBits: Định nghĩa intent mà bot cần sử dụng.
@@ -28,11 +30,9 @@ GatewayIntentBits.Guilds: Cho phép bot nhận dữ liệu về các server (gui
 GatewayIntentBits.GuildMessages: Cho phép bot nhận tin nhắn từ các server.
 GatewayIntentBits.MessageContent: Cho phép bot đọc nội dung tin nhắn (yêu cầu quyền hạn cao hơn).
 
-
 2. IntentsBitField:
 IntentsBitField là một công cụ khác để quản lý và kiểm tra các intent.
 Nó cung cấp các phương thức để tạo hoặc kiểm tra các intent phức tạp. 
-
 
 
 setActivity:
@@ -55,14 +55,23 @@ const client = new Client({
   ],
 });
 
+eventHandler(client);
+
 let activities = [
   {
     name: "Live Coding",
     type: ActivityType.Streaming,
-    url: "https://www.youtube.com/watch?v=uC8sc0cQa9M",
   },
   {
     name: "Spotify",
+    type: ActivityType.Listening,
+  },
+  {
+    name: "YouTube Music",
+    type: ActivityType.Listening,
+  },
+  {
+    name: "/help",
     type: ActivityType.Listening,
   },
   {
@@ -76,8 +85,6 @@ let activities = [
 ];
 
 client.on("ready", (c) => {
-  console.log(`✅ ${c.user.tag} is online.`);
-
   // const tenMinutes = 1 * 60 * 1000; // 10 phút = 10 * 60 * 1000 miligiây
 
   // setInterval(() => {
@@ -89,10 +96,9 @@ client.on("ready", (c) => {
   //   });
   // }, 15000);
 
-
   client.user.setPresence({
-    activities: [activities[1]], // Hoạt động ban đầu
-    status: "idle", // Trạng thái mặc định
+    activities: [activities[3]], // Hoạt động ban đầu
+    status: "online", // Trạng thái mặc định
   });
 });
 
@@ -134,10 +140,6 @@ client.on("interactionCreate", (interaction) => {
 
   if (interaction.commandName === "hey") {
     interaction.reply("hey!");
-  }
-
-  if (interaction.commandName === "ping") {
-    interaction.reply("pong!");
   }
 });
 
