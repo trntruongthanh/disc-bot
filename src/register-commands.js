@@ -81,7 +81,7 @@ const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
     */
 
     await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      Routes.applicationCommands(process.env.CLIENT_ID, process.env.GUILD_ID), // process.env.GUILD_ID
       {
         body: commands,
       }

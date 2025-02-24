@@ -39,25 +39,33 @@ const {
 
 module.exports = {
   /**
+   * This function is the callback for the "ban" command. It takes two parameters: client and interaction.
    *
-   * @param {Client} client
-   * @param {Interaction} interaction
+   * @param {Client} client - The Discord client instance.
+   * @param {Interaction} interaction - The interaction that triggered this command.
    */
 
   callback: async (client, interaction) => {
+    // Retrieve the target user's ID from the interaction options.
     const targetUserId = interaction.options.get("target-user").value;
+
+    // Retrieve the reason for the ban from the interaction options. If not provided, default to "No reason provided".
     const reason =
       interaction.options.get("reason")?.value || "No reason provided";
 
+    // Defer the reply to the interaction to let the user know that the bot is processing their request.
     await interaction.deferReply();
 
+    // Fetch the target user from the guild using their ID.
     const targetUser = await interaction.guild.members.fetch(targetUserId);
 
+    // If the target user doesn't exist in the guild, inform the user and exit.
     if (!targetUser) {
       await interaction.editReply("That user doesn't exist in this server.");
       return;
     }
 
+    // If the target user is the server owner, inform the user that they can't be banned and exit
     if (targetUserId === interaction.guild.ownerId) {
       await interaction.editReply(
         "You can't ban that user because they're the server owner."
@@ -65,10 +73,12 @@ module.exports = {
       return;
     }
 
+    // Determine the highest role position of the target user, the user running the command, and the bot.
     const targetUserRolePosition = targetUser.roles.highest.position; // Highest role of the target user
     const requestUserRolePosition = interaction.member.roles.highest.position; // Highest role of the user running the cmd
     const botRolePosition = interaction.guild.members.me.roles.highest.position; // Highest role of the bot
 
+    // If the target user has the same or higher role than the user running the command, inform the user and exit.
     if (targetUserRolePosition >= requestUserRolePosition) {
       await interaction.editReply(
         "You can't ban that user because they have the same/higher role than you."
@@ -76,6 +86,7 @@ module.exports = {
       return;
     }
 
+    // If the target user has the same or higher role than the bot, inform the user and exit.
     if (targetUserRolePosition >= botRolePosition) {
       await interaction.editReply(
         "I can't ban that user because they have the same role/higher role than me."
@@ -83,13 +94,15 @@ module.exports = {
       return;
     }
 
-    // Ban the targetUser
+    // Attempt to ban the target user with the provided reason.
     try {
       await targetUser.ban({ reason });
+      // Inform the user that the ban was successful.
       await interaction.editReply(
         `User ${targetUser} was banned\nReason: ${reason}`
       );
     } catch (error) {
+      // Log any errors that occur during the ban process.
       console.log(`There was an error when banning: ${error}`);
     }
   },

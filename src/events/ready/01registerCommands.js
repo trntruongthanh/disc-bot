@@ -6,7 +6,7 @@ const areCommandsDifferent = require("../../utils/areCommandsDifferent");
 
 module.exports = async (client) => {
   try {
-    const localCommands = getLocalCommands();         // kh cần truyền đối số vì vì trong định nghĩa của hàm, tham số exceptions đã được gán một giá trị mặc định là [].
+    const localCommands = getLocalCommands(); // kh cần truyền đối số vì vì trong định nghĩa của hàm, tham số exceptions đã được gán một giá trị mặc định là [].
     const applicationCommands = await getApplicationCommands(
       client,
       testServer

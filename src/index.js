@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const {
   Client,
   GatewayIntentBits,
@@ -8,7 +9,19 @@ const {
   ActivityType,
 } = require("discord.js");
 
+const client = new Client({
+  intents: [
+    IntentsBitField.Flags.Guilds,
+    IntentsBitField.Flags.GuildMembers,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.GuildPresences,
+    IntentsBitField.Flags.MessageContent,
+  ],
+});
+
 const eventHandler = require("./handlers/eventHandler");
+
+const mongoose = require("mongoose");
 
 /*
 Client: Kết nối bot của bạn với Discord API.
@@ -46,16 +59,21 @@ Toàn diện hơn, vì nó cho phép thay đổi cả hoạt động và trạng
 
 //==========================================================================================
 
-const client = new Client({
-  intents: [
-    IntentsBitField.Flags.Guilds,
-    IntentsBitField.Flags.GuildMembers,
-    IntentsBitField.Flags.GuildMessages,
-    IntentsBitField.Flags.MessageContent,
-  ],
-});
+(async () => {
+  try {
+    mongoose.set("strictQuery", false);
 
-eventHandler(client);
+    await mongoose.connect(process.env.MONGODB_URI);
+
+    console.log("Connected to DB.");
+
+    eventHandler(client);
+
+    client.login(process.env.TOKEN);
+  } catch (error) {
+    console.log(`Error: ${error}`);
+  }
+})();
 
 let activities = [
   {
@@ -98,7 +116,7 @@ client.on("ready", (c) => {
 
   client.user.setPresence({
     activities: [activities[3]], // Hoạt động ban đầu
-    status: "online", // Trạng thái mặc định
+    status: "idle", // Trạng thái mặc định
   });
 });
 
@@ -210,5 +228,3 @@ client.on("messageCreate", (message) => {
     message.reply("hello!");
   }
 });
-
-client.login(process.env.TOKEN);
