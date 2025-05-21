@@ -133,6 +133,7 @@ client.on("interactionCreate", (interaction) => {
   }
 
   // ======================== EMBED LINK ==========================================
+
   if (interaction.commandName === "embed") {
     const embed = new EmbedBuilder()
       .setTitle("Embed title")
@@ -154,12 +155,13 @@ client.on("interactionCreate", (interaction) => {
 
     interaction.reply({ embeds: [embed] });
   }
-  //=====================================================================================
 
   if (interaction.commandName === "hey") {
     interaction.reply("hey!");
   }
 });
+
+//=====================================================================================
 
 client.on("messageCreate", (message) => {
   if (message.content === "embed") {
@@ -185,16 +187,24 @@ client.on("messageCreate", (message) => {
   }
 });
 
-//=================================================================================
+//==========================Send-message=======================================================
 
 client.on("interactionCreate", async (interaction) => {
   try {
-    if (!interaction.isButton()) return;
 
+    // Kiểm tra xem sự kiện có phải là nút bấm (Button) không. Nếu không thì bỏ qua.
+    if (!interaction.isButton()) return; 
+
+    /*
+      Trì hoãn phản hồi lại cho người dùng (tránh bị lỗi timeout).
+      ephemeral: true nghĩa là chỉ người bấm mới thấy thông báo, người khác không thấy.
+    */
     await interaction.deferReply({ ephemeral: true });
 
+    // Dựa vào customId của nút (trùng với role.id trong file cũ), tìm vai trò tương ứng trong server.
     const role = interaction.guild.roles.cache.get(interaction.customId);
 
+    // Nếu không tìm thấy role → trả lời báo lỗi và kết thúc.
     if (!role) {
       interaction.editReply({
         content: "I couldn't find a role",
@@ -203,14 +213,24 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
-    const hasRole = interaction.member.roles.cache.has(role.id);
+    const hasRole = interaction.member.roles.cache.has(role.id); // Kiểm tra xem người dùng đã có role đó chưa.
 
+    /*
+      nếu đã có: 
+      Gỡ role đó khỏi người dùng.
+      Trả lời xác nhận đã gỡ.
+    */
     if (hasRole) {
       await interaction.member.roles.remove(role);
       await interaction.editReply(`The role ${role} has been removed`);
       return;
     }
 
+    /*
+      Nếu chưa có 
+      Thêm role vào cho người dùng.
+      Trả lời xác nhận đã thêm.
+    */
     await interaction.member.roles.add(role);
     await interaction.editReply(`The role ${role} has been added`);
   } catch (error) {
